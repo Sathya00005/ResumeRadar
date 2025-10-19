@@ -68,8 +68,12 @@ const CategoryHeader = ({
 
 const CategoryContent = ({
   tips,
+  onTipClick,
+  selectedTips,
 }: {
   tips: { type: "good" | "improve"; tip: string; explanation: string }[];
+  onTipClick?: (index: number) => void;
+  selectedTips?: Set<number>;
 }) => {
   return (
     <div className="flex flex-col gap-4 items-center w-full">
@@ -91,24 +95,32 @@ const CategoryContent = ({
         {tips.map((tip, index) => (
           <div
             key={index + tip.tip}
+            onClick={() => onTipClick?.(index)}
             className={cn(
-              "flex flex-col gap-2 rounded-2xl p-4",
+              "flex flex-col gap-2 rounded-2xl p-4 transition-all",
               tip.type === "good"
                 ? "bg-green-50 border border-green-200 text-green-700"
-                : "bg-yellow-50 border border-yellow-200 text-yellow-700"
+                : "bg-yellow-50 border border-yellow-200 text-yellow-700",
+              onTipClick && "cursor-pointer hover:shadow-lg",
+              selectedTips?.has(index) && "ring-2 ring-blue-500"
             )}
           >
-            <div className="flex flex-row gap-2 items-center">
-              <img
-                src={
-                  tip.type === "good"
-                    ? "/icons/check.svg"
-                    : "/icons/warning.svg"
-                }
-                alt="score"
-                className="size-5"
-              />
-              <p className="text-xl font-semibold">{tip.tip}</p>
+            <div className="flex flex-row gap-2 items-center justify-between">
+              <div className="flex flex-row gap-2 items-center">
+                <img
+                  src={
+                    tip.type === "good"
+                      ? "/icons/check.svg"
+                      : "/icons/warning.svg"
+                  }
+                  alt="score"
+                  className="size-5"
+                />
+                <p className="text-xl font-semibold">{tip.tip}</p>
+              </div>
+              {onTipClick && selectedTips?.has(index) && (
+                <img src="/icons/pin.svg" alt="pinned" className="size-5" />
+              )}
             </div>
             <p>{tip.explanation}</p>
           </div>
@@ -118,7 +130,15 @@ const CategoryContent = ({
   );
 };
 
-const Details = ({ feedback }: { feedback: Feedback }) => {
+const Details = ({
+  feedback,
+  onTipClick,
+  selectedTips,
+}: {
+  feedback: Feedback;
+  onTipClick?: (category: string, index: number) => void;
+  selectedTips?: Map<string, Set<number>>;
+}) => {
   return (
     <div className="flex flex-col gap-4 w-full">
       <Accordion>
@@ -130,7 +150,11 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
             />
           </AccordionHeader>
           <AccordionContent itemId="tone-style">
-            <CategoryContent tips={feedback.toneAndStyle.tips} />
+            <CategoryContent
+              tips={feedback.toneAndStyle.tips}
+              onTipClick={onTipClick ? (index) => onTipClick('toneAndStyle', index) : undefined}
+              selectedTips={selectedTips?.get('toneAndStyle')}
+            />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem id="content">
@@ -141,7 +165,11 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
             />
           </AccordionHeader>
           <AccordionContent itemId="content">
-            <CategoryContent tips={feedback.content.tips} />
+            <CategoryContent
+              tips={feedback.content.tips}
+              onTipClick={onTipClick ? (index) => onTipClick('content', index) : undefined}
+              selectedTips={selectedTips?.get('content')}
+            />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem id="structure">
@@ -152,7 +180,11 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
             />
           </AccordionHeader>
           <AccordionContent itemId="structure">
-            <CategoryContent tips={feedback.structure.tips} />
+            <CategoryContent
+              tips={feedback.structure.tips}
+              onTipClick={onTipClick ? (index) => onTipClick('structure', index) : undefined}
+              selectedTips={selectedTips?.get('structure')}
+            />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem id="skills">
@@ -163,7 +195,11 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
             />
           </AccordionHeader>
           <AccordionContent itemId="skills">
-            <CategoryContent tips={feedback.skills.tips} />
+            <CategoryContent
+              tips={feedback.skills.tips}
+              onTipClick={onTipClick ? (index) => onTipClick('skills', index) : undefined}
+              selectedTips={selectedTips?.get('skills')}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
